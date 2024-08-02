@@ -1,3 +1,7 @@
+<!--Shiv K.-->
+<!--Aug 1, 2024-->
+<!--The first way to do it, using simple HTML, CSS, js-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,6 +52,7 @@
             font-size: 1.1em;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin: 5px;
         }
         button:hover {
             background-color: #feb47b;
@@ -55,7 +60,7 @@
         #result {
             margin-top: 20px;
         }
-        img {
+        canvas {
             max-width: 100%;
             height: auto;
             border: 2px solid #ff7e5f;
@@ -66,10 +71,75 @@
 <body>
     <div class="container">
         <h1>Upload and Process Image</h1>
-        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" required>
-            <button type="submit">Upload and Process</button>
-        </form>
+        <input type="file" id="fileInput" accept="image/*" />
+        <button id="previewButton">Preview Original Image</button>
+        <button id="processButton">Convert to Grayscale</button>
+        <div id="result">
+            <canvas id="canvas"></canvas>
+        </div>
     </div>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const resultDiv = document.getElementById('result');
+        
+        function displayImage(src) {
+            const img = new Image();
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = src;
+        }
+
+        document.getElementById('previewButton').addEventListener('click', function() {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    displayImage(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select an image file first.');
+            }
+        });
+
+        document.getElementById('processButton').addEventListener('click', function() {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+
+                        // Get image data
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const data = imageData.data;
+
+                        // Convert to grayscale
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                            data[i] = avg;         // Red
+                            data[i + 1] = avg;     // Green
+                            data[i + 2] = avg;     // Blue
+                        }
+
+                        // Put the grayscale data back to canvas
+                        ctx.putImageData(imageData, 0, 0);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select an image file first.');
+            }
+        });
+    </script>
 </body>
 </html>

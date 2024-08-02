@@ -1,5 +1,6 @@
 #Shiv K.
 #Aug 1, 2024
+#The second way to do it, using OpenCV
 
 import cv2
 
